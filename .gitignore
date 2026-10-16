@@ -3,3 +3,4 @@ media/*
 data/
 node_modules/
 *.part
+config.bat
