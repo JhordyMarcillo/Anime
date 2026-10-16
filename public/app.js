@@ -66,7 +66,20 @@ function renderDetail(key) {
 
 /* ---------- reproductor ---------- */
 let current = null;
+window.__setPos = (id, sec) => { // lo llama la app de Android TV al cerrar su reproductor
+  const pos = store.get('pos') || {}; pos[id] = sec; store.set('pos', pos);
+  if (openKey) renderDetail(openKey);
+};
+
 function play(g, item) {
+  if (window.AndroidTV) { // app de Android TV: reproductor nativo (MKV, seek, audio/subs)
+    const list = g.items.map((i) => ({
+      id: i.id, title: `${g.meta?.name || g.title} — ${epLabel(i)}`, url: `/stream/${i.id}?raw=1`,
+      subs: i.subs.map((s) => ({ label: s.label, url: `/sub/${i.id}/${s.n}` })),
+    }));
+    window.AndroidTV.play(JSON.stringify(list), g.items.indexOf(item), JSON.stringify(store.get('pos') || {}));
+    return;
+  }
   current = item;
   $('player').hidden = false;
   video.replaceChildren();

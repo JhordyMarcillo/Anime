@@ -29,6 +29,19 @@ animes, series y películas.
 - TV con navegador (Android TV, Fire TV, Samsung/LG): abre la URL del servidor. En Android TV / Fire TV
   también puedes usar el navegador con la IP de Tailscale o de tu red local.
 
+## App de Android TV (`android/`)
+
+App nativa (Kotlin) que abre tu biblioteca y reproduce con **ExoPlayer**: MKV, HEVC, AC3, adelantar
+de verdad, y selección de audio/subtítulos con el control remoto. También se instala en celulares Android.
+
+- **APK:** GitHub → pestaña *Actions* → *Android APK* → último run → artefacto `AnimeTV-debug-apk`
+  (o ejecuta el workflow a mano con *Run workflow*). Local: `cd android && gradle assembleDebug`.
+- **Instalar en la TV:** con *Downloader* (Fire TV/Android TV) o `adb connect IP_TV && adb install app-debug.apk`.
+  Activa "orígenes desconocidos" / depuración USB en la TV.
+- **Primer uso:** escribe la dirección del servidor (`100.x.y.z:8000` con Tailscale, o `192.168.x.x:8000`) y la
+  clave si pusiste `AUTH_USER`/`AUTH_PASS`. Botón *Menú* del control = volver a Ajustes.
+- Para salir de casa instala también Tailscale en la TV (hay app para Android TV).
+
 ## Uso
 
 ```

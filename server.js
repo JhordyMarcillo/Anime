@@ -49,9 +49,9 @@ const send = (res, code, body, type = 'application/json') => {
   res.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
 };
 
-function stream(req, res, f) {
+function stream(req, res, f, raw) {
   const full = path.join(MEDIA_DIR, f.rel);
-  if (!NATIVE.has(f.ext) && HAS_FFMPEG) { // MKV/AVI → MP4 fragmentado al vuelo (sin seek)
+  if (!raw && !NATIVE.has(f.ext) && HAS_FFMPEG) { // MKV/AVI → MP4 fragmentado al vuelo (sin seek)
     res.writeHead(200, { 'Content-Type': 'video/mp4' });
     const ff = spawn('ffmpeg', ['-v', 'error', '-i', full, '-map', '0:v:0', '-map', '0:a:0?', '-c:v', 'copy', '-c:a', 'aac',
       '-movflags', 'frag_keyframe+empty_moov+default_base_moof', '-f', 'mp4', 'pipe:1']);
@@ -117,7 +117,7 @@ http.createServer((req, res) => {
     });
     if (p === '/api/downloads' && req.method === 'DELETE') return readJson(req, res, ({ url: u }) => { dl.unsubscribe(u); send(res, 200, { ok: true }); });
     let m;
-    if ((m = p.match(/^\/stream\/(\w+)$/))) { const f = lib.files.get(m[1]); return f ? stream(req, res, f) : send(res, 404, { error: 'no existe' }); }
+    if ((m = p.match(/^\/stream\/(\w+)$/))) { const f = lib.files.get(m[1]); return f ? stream(req, res, f, url.searchParams.get('raw') === '1') : send(res, 404, { error: 'no existe' }); }
     if ((m = p.match(/^\/sub\/(\w+)\/(\d+)$/))) {
       const s = lib.files.get(m[1])?.subs[+m[2]];
       if (!s) return send(res, 404, { error: 'no existe' });
