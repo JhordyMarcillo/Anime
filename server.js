@@ -5,6 +5,7 @@ const path = require('path');
 const { spawn, spawnSync } = require('child_process');
 const { Library, VIDEO, SUB } = require('./lib/library');
 const { toVtt } = require('./lib/subs');
+const { Downloader } = require('./lib/downloader');
 
 const PORT = +process.env.PORT || 8000;
 const HOST = process.env.HOST || '127.0.0.1';   // 0.0.0.0 para abrir a tu red local
@@ -16,7 +17,9 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
   '.m4v': 'video/mp4', '.webm': 'video/webm', '.mov': 'video/mp4', '.mkv': 'video/x-matroska', '.avi': 'video/x-msvideo' };
 
 const lib = new Library(MEDIA_DIR, path.join(__dirname, 'data'));
+const dl = new Downloader(MEDIA_DIR, path.join(__dirname, 'data'));
 const clients = new Set();
+dl.on('update', () => { for (const r of clients) r.write('data: downloads\n\n'); });
 lib.on('change', () => { for (const r of clients) r.write('data: change\n\n'); });
 
 // --- actualización automática: watcher + reescaneo periódico ---
@@ -73,6 +76,14 @@ function upload(req, res, url) {
   req.on('aborted', fail); out.on('error', (e) => { fail(); send(res, 500, { error: e.message }); });
 }
 
+function readJson(req, res, fn) {
+  let body = '';
+  req.on('data', (d) => { body += d; if (body.length > 10000) req.destroy(); });
+  req.on('end', async () => {
+    try { await fn(JSON.parse(body || '{}')); } catch (e) { send(res, 400, { error: e.message }); }
+  });
+}
+
 http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   const p = url.pathname;
@@ -83,6 +94,12 @@ http.createServer((req, res) => {
       res.write('retry: 3000\n\n'); clients.add(res); req.on('close', () => clients.delete(res)); return;
     }
     if (p === '/api/upload' && req.method === 'POST') return upload(req, res, url);
+    if (p === '/api/downloads' && req.method === 'GET') return send(res, 200, dl.state());
+    if (p === '/api/downloads' && req.method === 'POST') return readJson(req, res, async ({ url: u, subscribe }) => {
+      if (subscribe) dl.subscribe(u); else await dl.add(u);
+      send(res, 202, { ok: true });
+    });
+    if (p === '/api/downloads' && req.method === 'DELETE') return readJson(req, res, ({ url: u }) => { dl.unsubscribe(u); send(res, 200, { ok: true }); });
     let m;
     if ((m = p.match(/^\/stream\/(\w+)$/))) { const f = lib.files.get(m[1]); return f ? stream(req, res, f) : send(res, 404, { error: 'no existe' }); }
     if ((m = p.match(/^\/sub\/(\w+)\/(\d+)$/))) {

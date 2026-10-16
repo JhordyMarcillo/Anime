@@ -133,9 +133,28 @@ addEventListener('drop', async (e) => {
   upload(files);
 });
 
+/* ---------- descargas y suscripciones ---------- */
+async function loadDownloads() {
+  const d = await (await fetch('/api/downloads')).json();
+  $('dl-note').textContent = d.ytdlp
+    ? `yt-dlp detectado. Las suscripciones se revisan cada ${d.everyHours} h.`
+    : 'Sin yt-dlp solo se aceptan enlaces directos a archivos de video. Instala yt-dlp para páginas y listas.';
+  $('dl-jobs').replaceChildren(...d.jobs.map((j) => el('li', {}, `[${j.status}${j.progress ? ' ' + j.progress : ''}] ${j.url}${j.error ? ' — ' + j.error : ''}`)));
+  $('dl-subs').replaceChildren(...d.subscriptions.map((s) => el('li', {}, s.url + ' ',
+    el('button', { onclick: async () => { await sendDl('DELETE', { url: s.url }); } }, 'Quitar'))));
+}
+async function sendDl(method, body) {
+  const res = await fetch('/api/downloads', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) toast((await res.json().catch(() => ({}))).error || 'Error ' + res.status);
+  loadDownloads().catch(() => {});
+}
+$('dl-form').onsubmit = async (e) => { e.preventDefault(); await sendDl('POST', { url: $('dl-url').value }); $('dl-url').value = ''; };
+$('dl-sub').onclick = () => { const v = $('dl-url').value; if (v) sendDl('POST', { url: v, subscribe: true }); };
+
 /* ---------- actualización en vivo ---------- */
 const events = new EventSource('/api/events');
-events.onmessage = () => load().catch(() => {});
+events.onmessage = (e) => { if (e.data === 'downloads') loadDownloads().catch(() => {}); else load().catch(() => {}); };
+loadDownloads().catch(() => {});
 $('q').oninput = renderGrid;
 $('kind').onchange = renderGrid;
 load().catch((e) => toast(e.message));

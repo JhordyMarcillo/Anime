@@ -20,6 +20,18 @@
     <p id="now" class="muted"></p>
     <button id="close">Cerrar reproductor</button>
   </section>
+  <details id="dl">
+    <summary>Descargas y suscripciones</summary>
+    <form id="dl-form">
+      <input id="dl-url" type="url" placeholder="URL de un video o lista de reproducción que tengas derecho a descargar" required>
+      <button>Descargar</button>
+      <button type="button" id="dl-sub" title="Revisa la URL cada pocas horas y descarga lo nuevo (requiere yt-dlp)">Suscribirse</button>
+    </form>
+    <p id="dl-note" class="muted"></p>
+    <ul id="dl-jobs"></ul>
+    <h3>Suscripciones</h3>
+    <ul id="dl-subs"></ul>
+  </details>
   <section id="detail" hidden></section>
   <section id="grid"></section>
   <p id="empty" class="muted" hidden>La biblioteca está vacía. Arrastra videos aquí, usa "Subir archivos" o copia archivos a la carpeta <code>media/</code>: se detectan solos.</p>

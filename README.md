@@ -9,6 +9,11 @@ animes, series y películas.
   y avisa al navegador en vivo (SSE).
 - **Metadatos automáticos:** póster, sinopsis, año y géneros desde AniList (sin clave).
   Opcional: `TMDB_API_KEY` para series y películas que no son anime.
+- **Descargas por URL y suscripciones:** pega un enlace directo a un video, o (con
+  [yt-dlp](https://github.com/yt-dlp/yt-dlp) instalado) una página o lista de reproducción
+  de un sitio que lo permita. Se guarda en `media/Descargas/` con sus subtítulos y entra
+  sola a la biblioteca. "Suscribirse" revisa la URL cada `SUBSCRIPTION_HOURS` (6) y baja
+  solo lo nuevo. Se rechazan direcciones de red local.
 - **Subtítulos:** `.srt`, `.vtt`, `.ass/.ssa` junto al video con el mismo nombre
   (`Episodio 01.es.srt`), convertidos a WebVTT.
 - **Reproducción:** rango HTTP (seek), siguiente episodio automático y "continuar viendo".
@@ -35,5 +40,7 @@ media/Mi Pelicula (2020).mp4
 
 Reconoce `S01E02`, `1x02`, `Ep 2`, ` - 02` y limpia etiquetas como `[Grupo]` o `1080p`.
 
-> Pensado para contenido que tú posees o tiene licencia libre. Sin autenticación:
+> Descarga solo contenido que tengas derecho a guardar (el tuyo, dominio público,
+> licencias libres o canales que lo permitan). No incluye scrapers de sitios piratas.
+> Sin autenticación:
 > no lo expongas a internet.
