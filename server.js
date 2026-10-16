@@ -10,6 +10,21 @@ const { Downloader } = require('./lib/downloader');
 const PORT = +process.env.PORT || 8000;
 const HOST = process.env.HOST || '127.0.0.1';   // 0.0.0.0 para abrir a tu red local
 const MEDIA_DIR = path.resolve(process.env.MEDIA_DIR || path.join(__dirname, 'media'));
+const AUTH_USER = process.env.AUTH_USER || '';
+const AUTH_PASS = process.env.AUTH_PASS || '';
+const AUTH = AUTH_USER && AUTH_PASS ? Buffer.from(`${AUTH_USER}:${AUTH_PASS}`) : null;
+const LOOPBACK = ['127.0.0.1', 'localhost', '::1'].includes(HOST);
+if (!AUTH && !LOOPBACK && process.env.ALLOW_NO_AUTH !== '1') {
+  console.error('Para escuchar fuera de localhost define AUTH_USER y AUTH_PASS (o ALLOW_NO_AUTH=1 bajo tu riesgo).');
+  process.exit(1);
+}
+const authorized = (req) => {
+  if (!AUTH) return true;
+  const m = (req.headers.authorization || '').match(/^Basic (.+)$/i);
+  if (!m) return false;
+  const got = Buffer.from(m[1], 'base64');
+  return got.length === AUTH.length && require('crypto').timingSafeEqual(got, AUTH);
+};
 const PUBLIC = path.join(__dirname, 'public');
 const HAS_FFMPEG = spawnSync('ffmpeg', ['-version']).status === 0;
 const NATIVE = new Set(['.mp4', '.m4v', '.webm', '.mov']);
@@ -85,6 +100,7 @@ function readJson(req, res, fn) {
 }
 
 http.createServer((req, res) => {
+  if (!authorized(req)) { res.writeHead(401, { 'WWW-Authenticate': 'Basic realm="Biblioteca"' }); return res.end(); }
   const url = new URL(req.url, 'http://x');
   const p = url.pathname;
   try {

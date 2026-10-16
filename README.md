@@ -44,3 +44,15 @@ Reconoce `S01E02`, `1x02`, `Ep 2`, ` - 02` y limpia etiquetas como `[Grupo]` o `
 > licencias libres o canales que lo permitan). No incluye scrapers de sitios piratas.
 > Sin autenticación:
 > no lo expongas a internet.
+
+## Tenerlo en un servidor (VPS, NAS, Raspberry Pi)
+
+```
+git clone https://github.com/JhordyMarcillo/Anime && cd Anime
+AUTH_USER=tu_usuario AUTH_PASS=una_clave_larga docker compose up -d --build
+```
+
+La imagen trae `ffmpeg` y `yt-dlp`. Todo se guarda en `./media` (monta ahí tu disco).
+Fuera de localhost el servidor exige `AUTH_USER`/`AUTH_PASS` (autenticación básica);
+ponlo detrás de HTTPS (Caddy, Nginx, Cloudflare Tunnel o Tailscale) para que la clave
+no viaje en claro. Sin Docker: `HOST=0.0.0.0 AUTH_USER=... AUTH_PASS=... node server.js`.

@@ -1,0 +1,14 @@
+services:
+  biblioteca:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      AUTH_USER: ${AUTH_USER:?define AUTH_USER}
+      AUTH_PASS: ${AUTH_PASS:?define AUTH_PASS}
+      TMDB_API_KEY: ${TMDB_API_KEY:-}
+      SUBSCRIPTION_HOURS: ${SUBSCRIPTION_HOURS:-6}
+    volumes:
+      - ./media:/media        # aquí se guarda todo (cámbialo por tu disco/NAS)
+      - ./data:/app/data      # caché de metadatos y suscripciones
