@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mi Biblioteca</title>
+<meta name="theme-color" content="#0f1115">
+<link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,7 +21,7 @@
   <section id="player" hidden>
     <video id="video" controls playsinline autoplay></video>
     <p id="now" class="muted"></p>
-    <button id="close">Cerrar reproductor</button>
+    <div class="bar"><button id="cast" hidden>Enviar a TV</button><button id="fs">Pantalla completa</button><button id="close">Cerrar</button></div>
   </section>
   <details id="dl">
     <summary>Descargas y suscripciones</summary>

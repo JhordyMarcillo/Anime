@@ -10,6 +10,7 @@ function el(tag, props = {}, ...kids) {
   n.append(...kids);
   return n;
 }
+const enter = (fn) => (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } };
 let toastTimer;
 function toast(msg) {
   const t = $('toast'); t.textContent = msg; t.hidden = false;
@@ -38,7 +39,7 @@ function renderGrid() {
       ? el('img', { className: 'poster', src: g.meta.poster, alt: '', loading: 'lazy' })
       : el('div', { className: 'poster' });
     const n = g.items.length;
-    return el('div', { className: 'card', onclick: () => openDetail(g.key) }, poster,
+    return el('div', { className: 'card', tabIndex: 0, onclick: () => openDetail(g.key), onkeydown: enter(() => openDetail(g.key)) }, poster,
       el('span', {}, g.meta?.name || g.title),
       el('small', {}, g.kind === 'movie' ? 'Película' : `${n} episodio${n === 1 ? '' : 's'}`));
   }));
@@ -57,7 +58,7 @@ function renderDetail(key) {
     el('p', { className: 'muted' }, [m?.year, m?.genres?.join(', '), m?.score ? `★ ${m.score}/100` : ''].filter(Boolean).join(' · ')),
     el('p', {}, m?.overview || ''));
   const watched = store.get('pos') || {};
-  const ul = el('ul', {}, ...g.items.map((i) => el('li', { onclick: () => play(g, i) },
+  const ul = el('ul', {}, ...g.items.map((i) => el('li', { tabIndex: 0, onclick: () => play(g, i), onkeydown: enter(() => play(g, i)) },
     el('span', {}, epLabel(i)),
     el('span', { className: 'muted' }, watched[i.id] > 5 ? `visto ${Math.floor(watched[i.id] / 60)} min` : ''))));
   box.replaceChildren(el('div', { className: 'top' }, m?.poster ? el('img', { src: m.poster, alt: '' }) : '', info), ul);
@@ -93,6 +94,9 @@ video.ontimeupdate = () => {
   store.set('pos', pos);
 };
 video.onerror = () => toast('No se pudo reproducir. Si es MKV/AVI, instala ffmpeg en el servidor.');
+$('fs').onclick = () => (document.fullscreenElement ? document.exitFullscreen() : (video.requestFullscreen?.() || video.webkitEnterFullscreen?.()));
+// Enviar a TV / Chromecast / AirPlay con la API Remote Playback (si el navegador la tiene)
+if (video.remote) { $('cast').hidden = false; $('cast').onclick = () => video.remote.prompt().catch((e) => toast('No se pudo enviar: ' + e.message)); }
 $('close').onclick = () => { video.pause(); video.removeAttribute('src'); video.load(); $('player').hidden = true; current = null; };
 
 /* ---------- subida ---------- */
@@ -158,3 +162,5 @@ loadDownloads().catch(() => {});
 $('q').oninput = renderGrid;
 $('kind').onchange = renderGrid;
 load().catch((e) => toast(e.message));
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});

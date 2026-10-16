@@ -19,6 +19,16 @@ animes, series y películas.
 - **Reproducción:** rango HTTP (seek), siguiente episodio automático y "continuar viendo".
   Los `.mkv`/`.avi` se convierten al vuelo si `ffmpeg` está instalado (sin seek en esos).
 
+## Celular y TV
+
+- Interfaz adaptable a celular, tablet y pantallas grandes; se navega con teclado/control remoto
+  (Tab/flechas + Enter) y tiene botón de pantalla completa.
+- Instalable como app (PWA) desde Chrome/Safari: "Añadir a pantalla de inicio". La instalación exige
+  HTTPS o `localhost`; con Tailscale usa `tailscale serve --bg 8000` para obtener HTTPS.
+- "Enviar a TV" usa la API Remote Playback (Chromecast/AirPlay) donde el navegador la soporta.
+- TV con navegador (Android TV, Fire TV, Samsung/LG): abre la URL del servidor. En Android TV / Fire TV
+  también puedes usar el navegador con la IP de Tailscale o de tu red local.
+
 ## Uso
 
 ```

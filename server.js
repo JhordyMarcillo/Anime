@@ -29,7 +29,7 @@ const PUBLIC = path.join(__dirname, 'public');
 const HAS_FFMPEG = spawnSync('ffmpeg', ['-version']).status === 0;
 const NATIVE = new Set(['.mp4', '.m4v', '.webm', '.mov']);
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.mp4': 'video/mp4',
-  '.m4v': 'video/mp4', '.webm': 'video/webm', '.mov': 'video/mp4', '.mkv': 'video/x-matroska', '.avi': 'video/x-msvideo' };
+  '.m4v': 'video/mp4', '.webm': 'video/webm', '.mov': 'video/mp4', '.mkv': 'video/x-matroska', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json', '.avi': 'video/x-msvideo' };
 
 const lib = new Library(MEDIA_DIR, path.join(__dirname, 'data'));
 const dl = new Downloader(MEDIA_DIR, path.join(__dirname, 'data'));
