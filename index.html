@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anime Player</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Anime Player</h1>
+  <form id="search-form">
+    <input id="q" type="search" placeholder="Buscar anime (AniList)..." autocomplete="off">
+    <button>Buscar</button>
+  </form>
+</header>
+
+<main>
+  <section id="player-section">
+    <video id="video" controls playsinline crossorigin="anonymous"></video>
+    <div class="controls">
+      <fieldset>
+        <legend>Video</legend>
+        <input type="file" id="video-file" accept="video/*,.mkv">
+        <div class="row">
+          <input type="url" id="video-url" placeholder="URL .mp4 / .webm / .m3u8">
+          <button id="load-url">Cargar</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Subtítulos (.srt / .vtt / .ass)</legend>
+        <input type="file" id="sub-file" accept=".srt,.vtt,.ass,.ssa" multiple>
+        <div class="row">
+          <label>Tamaño <input type="range" id="sub-size" min="50" max="200" value="100"></label>
+          <label>Desfase (s) <input type="number" id="sub-offset" value="0" step="0.5"></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Velocidad</legend>
+        <select id="speed">
+          <option>0.5</option><option>0.75</option><option selected>1</option>
+          <option>1.25</option><option>1.5</option><option>2</option>
+        </select>
+      </fieldset>
+    </div>
+    <p id="status" class="muted">Carga un video propio o una URL, y añade subtítulos.</p>
+  </section>
+
+  <section id="info"></section>
+  <section id="results"></section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
