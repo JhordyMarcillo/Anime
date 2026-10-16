@@ -1,0 +1,9 @@
+{
+  "name": "anime-library",
+  "version": "1.0.0",
+  "description": "Biblioteca multimedia propia con subtítulos y metadatos automáticos",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

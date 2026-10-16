@@ -1,9 +1,39 @@
-# Anime Player
+# Mi Biblioteca
 
-Reproductor web con subtítulos + buscador de anime (AniList).
+Servidor multimedia personal (tipo Plex/Jellyfin, sin dependencias) para tus propios
+animes, series y películas.
 
-- Video: archivo local o URL (.mp4/.webm/.m3u8 con hls.js).
-- Subtítulos: .srt, .vtt, .ass/.ssa, varios a la vez, con tamaño y desfase.
-- Información: AniList GraphQL (sin clave). Enlaces a plataformas oficiales.
+- **Subida automática:** arrastra archivos o carpetas a la web, usa "Subir archivos"
+  o copia/descarga directamente en `media/`. Se detectan solos.
+- **Biblioteca que se actualiza sola:** vigila la carpeta (`fs.watch` + reescaneo cada 60 s)
+  y avisa al navegador en vivo (SSE).
+- **Metadatos automáticos:** póster, sinopsis, año y géneros desde AniList (sin clave).
+  Opcional: `TMDB_API_KEY` para series y películas que no son anime.
+- **Subtítulos:** `.srt`, `.vtt`, `.ass/.ssa` junto al video con el mismo nombre
+  (`Episodio 01.es.srt`), convertidos a WebVTT.
+- **Reproducción:** rango HTTP (seek), siguiente episodio automático y "continuar viendo".
+  Los `.mkv`/`.avi` se convierten al vuelo si `ffmpeg` está instalado (sin seek en esos).
 
-Uso: `python3 -m http.server 8000` y abre http://localhost:8000
+## Uso
+
+```
+node server.js          # Node >= 20
+# http://localhost:8000
+```
+
+Variables: `PORT` (8000), `HOST` (127.0.0.1; usa 0.0.0.0 para tu red local),
+`MEDIA_DIR` (./media), `TMDB_API_KEY`.
+
+## Organización recomendada
+
+```
+media/Frieren/Frieren - 01.mkv
+media/Frieren/Frieren - 01.es.srt
+media/Frieren/Season 2/Frieren S02E03.mkv
+media/Mi Pelicula (2020).mp4
+```
+
+Reconoce `S01E02`, `1x02`, `Ep 2`, ` - 02` y limpia etiquetas como `[Grupo]` o `1080p`.
+
+> Pensado para contenido que tú posees o tiene licencia libre. Sin autenticación:
+> no lo expongas a internet.

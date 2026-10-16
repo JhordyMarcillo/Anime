@@ -1,0 +1,5 @@
+media/*
+!media/.gitkeep
+data/
+node_modules/
+*.part

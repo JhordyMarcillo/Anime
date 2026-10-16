@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Biblioteca</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Mi Biblioteca</h1>
+  <input id="q" type="search" placeholder="Filtrar..." autocomplete="off">
+  <select id="kind"><option value="">Todo</option><option value="series">Series / Anime</option><option value="movie">Películas</option></select>
+  <label class="upload">Subir archivos<input id="files" type="file" multiple hidden accept="video/*,.mkv,.srt,.vtt,.ass,.ssa"></label>
+</header>
+
+<main>
+  <section id="player" hidden>
+    <video id="video" controls playsinline autoplay></video>
+    <p id="now" class="muted"></p>
+    <button id="close">Cerrar reproductor</button>
+  </section>
+  <section id="detail" hidden></section>
+  <section id="grid"></section>
+  <p id="empty" class="muted" hidden>La biblioteca está vacía. Arrastra videos aquí, usa "Subir archivos" o copia archivos a la carpeta <code>media/</code>: se detectan solos.</p>
+</main>
+<div id="drop" hidden>Suelta los archivos para subirlos</div>
+<div id="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
