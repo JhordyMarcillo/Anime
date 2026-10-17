@@ -32,6 +32,15 @@
     </form>
     <p id="dl-note" class="muted"></p>
     <ul id="dl-jobs"></ul>
+    <h3>Fuentes en línea (ver sin descargar)</h3>
+    <p class="muted">Pega una URL de video, un feed RSS/Atom o (con yt-dlp) una página o lista. Sus videos aparecen en la biblioteca y se reproducen en streaming a través de tu servidor.</p>
+    <form id="src-form">
+      <input id="src-url" type="url" placeholder="URL de video, feed o lista" required>
+      <input id="src-title" type="text" placeholder="Título (opcional, para video directo)">
+      <button>Añadir fuente</button>
+      <button type="button" id="src-refresh">Actualizar todas</button>
+    </form>
+    <ul id="src-list"></ul>
     <h3>Feeds automáticos (RSS / Atom)</h3>
     <p class="muted">Pega un feed con enlaces a videos. Cada cierto tiempo se revisa y se baja solo lo nuevo que cumpla el filtro.</p>
     <form id="feed-form">

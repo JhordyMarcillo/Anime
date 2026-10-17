@@ -41,7 +41,7 @@ function renderGrid() {
     const n = g.items.length;
     return el('div', { className: 'card', tabIndex: 0, onclick: () => openDetail(g.key), onkeydown: enter(() => openDetail(g.key)) }, poster,
       el('span', {}, g.meta?.name || g.title),
-      el('small', {}, g.kind === 'movie' ? 'Película' : `${n} episodio${n === 1 ? '' : 's'}`));
+      el('small', {}, (g.kind === 'movie' ? 'Película' : `${n} episodio${n === 1 ? '' : 's'}`) + (g.items.some((i) => i.remote) ? ' · en línea' : '')));
   }));
   $('empty').hidden = library.length > 0;
 }
@@ -59,7 +59,7 @@ function renderDetail(key) {
     el('p', {}, m?.overview || ''));
   const watched = store.get('pos') || {};
   const ul = el('ul', {}, ...g.items.map((i) => el('li', { tabIndex: 0, onclick: () => play(g, i), onkeydown: enter(() => play(g, i)) },
-    el('span', {}, epLabel(i)),
+    el('span', {}, epLabel(i), i.remote ? el('span', { className: 'tag' }, ' en línea') : ''),
     el('span', { className: 'muted' }, watched[i.id] > 5 ? `visto ${Math.floor(watched[i.id] / 60)} min` : ''))));
   box.replaceChildren(el('div', { className: 'top' }, m?.poster ? el('img', { src: m.poster, alt: '' }) : '', info), ul);
 }
@@ -168,6 +168,26 @@ async function sendDl(method, body) {
 $('dl-form').onsubmit = async (e) => { e.preventDefault(); await sendDl('POST', { url: $('dl-url').value }); $('dl-url').value = ''; };
 $('dl-sub').onclick = () => { const v = $('dl-url').value; if (v) sendDl('POST', { url: v, subscribe: true }); };
 
+async function loadSources() {
+  const list = await (await fetch('/api/sources')).json();
+  const kinds = { direct: 'video', feed: 'feed', page: 'página' };
+  $('src-list').replaceChildren(...list.map((s) => el('li', {},
+    `[${kinds[s.type] || s.type}] ${s.title ? s.title + ' · ' : ''}${s.url} · ${s.count} entradas${s.lastError ? ' · error: ' + s.lastError : ''} `,
+    el('button', { onclick: async () => { await sendSrc('DELETE', { id: s.id }); } }, 'Quitar'))));
+}
+async function sendSrc(method, body, path = '/api/sources') {
+  const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) toast((await res.json().catch(() => ({}))).error || 'Error ' + res.status);
+  loadSources().catch(() => {});
+}
+$('src-form').onsubmit = async (e) => {
+  e.preventDefault();
+  toast('Consultando la fuente...');
+  await sendSrc('POST', { url: $('src-url').value, title: $('src-title').value });
+  $('src-url').value = ''; $('src-title').value = '';
+};
+$('src-refresh').onclick = () => sendSrc('POST', {}, '/api/sources/refresh');
+
 async function loadFeeds() {
   const d = await (await fetch('/api/feeds')).json();
   const when = (t) => (t ? new Date(t).toLocaleString() : 'nunca');
@@ -189,7 +209,7 @@ $('feed-form').onsubmit = async (e) => {
 
 /* ---------- actualización en vivo ---------- */
 const events = new EventSource('/api/events');
-events.onmessage = (e) => { if (e.data === 'downloads') { loadDownloads().catch(() => {}); loadFeeds().catch(() => {}); } else load().catch(() => {}); };
+events.onmessage = (e) => { if (e.data === 'downloads') { loadDownloads().catch(() => {}); loadFeeds().catch(() => {}); loadSources().catch(() => {}); } else load().catch(() => {}); };
 loadDownloads().catch(() => {});
 $('q').oninput = renderGrid;
 $('kind').onchange = renderGrid;
@@ -197,3 +217,4 @@ load().catch((e) => toast(e.message));
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 loadFeeds().catch(() => {});
+loadSources().catch(() => {});

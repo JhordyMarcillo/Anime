@@ -14,6 +14,11 @@ animes, series y películas.
   de un sitio que lo permita. Se guarda en `media/Descargas/` con sus subtítulos y entra
   sola a la biblioteca. "Suscribirse" revisa la URL cada `SUBSCRIPTION_HOURS` (6) y baja
   solo lo nuevo. Se rechazan direcciones de red local.
+- **Fuentes en línea (ver sin descargar):** añade una URL de video directo, un feed RSS/Atom o (con yt-dlp)
+  una página/lista. Sus videos aparecen en la biblioteca con la etiqueta "en línea" (agrupados por título,
+  con póster y sinopsis) y se reproducen en streaming a través de tu servidor, con seek (Range). Funciona igual
+  en la web y en la app de Android TV. Límites: sin subtítulos externos, sin HLS (`.m3u8`) por ahora, y
+  el servidor gasta ancho de banda al reenviar el video. Las URLs a redes locales se rechazan.
 - **Feeds automáticos (RSS/Atom):** pega una vez la URL de un feed y un filtro (`show 1080p -batch`,
   todas las palabras deben aparecer, `-palabra` excluye, `"frase exacta"`). Se revisa cada
   `FEED_MINUTES` (30) y se baja solo lo nuevo; al añadirlo, lo ya publicado no se baja salvo que marques

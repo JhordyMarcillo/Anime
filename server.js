@@ -5,7 +5,9 @@ const path = require('path');
 const { spawn, spawnSync } = require('child_process');
 const { Library, VIDEO, SUB } = require('./lib/library');
 const { toVtt } = require('./lib/subs');
-const { Downloader, checkUrl } = require('./lib/downloader');
+const { Readable } = require('stream');
+const { Downloader, checkUrl, HAS_YTDLP } = require('./lib/downloader');
+const { Sources } = require('./lib/sources');
 const { Feeds } = require('./lib/feeds');
 
 const PORT = +process.env.PORT || 8000;
@@ -36,6 +38,9 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
 const lib = new Library(MEDIA_DIR, DATA_DIR);
 const dl = new Downloader(MEDIA_DIR, DATA_DIR);
 const feeds = new Feeds(dl, DATA_DIR, checkUrl);
+const sources = new Sources(DATA_DIR, checkUrl, (u) => feeds.fetchXml(u), HAS_YTDLP);
+sources.on('update', () => { lib.setRemote(sources.entries()); for (const r of clients) r.write('data: downloads\n\n'); });
+lib.remote = sources.entries();
 const clients = new Set();
 feeds.on('update', () => { for (const r of clients) r.write('data: downloads\n\n'); });
 dl.on('update', () => { for (const r of clients) r.write('data: downloads\n\n'); });
@@ -53,7 +58,33 @@ const send = (res, code, body, type = 'application/json') => {
   res.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
 };
 
+// Reenvía un video remoto con soporte de Range (seek). Cada salto se valida contra redes locales.
+async function proxyRemote(req, res, f) {
+  const ac = new AbortController();
+  res.on('close', () => ac.abort());
+  try {
+    let url = await sources.resolve(sources.getEntry(f.id) || { url: f.url });
+    for (let hop = 0; hop < 5; hop++) {
+      await checkUrl(url);
+      const headers = { 'User-Agent': 'AnimeLibrary/1.0' };
+      if (req.headers.range) headers.Range = req.headers.range;
+      const up = await fetch(url, { redirect: 'manual', headers, signal: ac.signal });
+      if (up.status >= 300 && up.status < 400 && up.headers.get('location')) { url = new URL(up.headers.get('location'), url).href; continue; }
+      if (!up.ok && up.status !== 206) return send(res, 502, { error: 'el origen respondió ' + up.status });
+      const out = { 'Accept-Ranges': up.headers.get('accept-ranges') || 'bytes', 'Cache-Control': 'no-store' };
+      let type = up.headers.get('content-type') || '';
+      if (!type.startsWith('video/')) type = MIME[path.extname(new URL(url).pathname).toLowerCase()] || 'video/mp4';
+      out['Content-Type'] = type;
+      for (const h of ['content-length', 'content-range']) if (up.headers.get(h)) out[h] = up.headers.get(h);
+      res.writeHead(up.status, out);
+      return Readable.fromWeb(up.body).on('error', () => res.destroy()).pipe(res);
+    }
+    send(res, 502, { error: 'demasiadas redirecciones' });
+  } catch (e) { if (!res.headersSent) send(res, 502, { error: e.message }); else res.destroy(); }
+}
+
 function stream(req, res, f, raw) {
+  if (f.remote) return proxyRemote(req, res, f);
   const full = path.join(MEDIA_DIR, f.rel);
   if (!raw && !NATIVE.has(f.ext) && HAS_FFMPEG) { // MKV/AVI → MP4 fragmentado al vuelo (sin seek)
     res.writeHead(200, { 'Content-Type': 'video/mp4' });
@@ -119,6 +150,10 @@ http.createServer((req, res) => {
       if (subscribe) dl.subscribe(u); else await dl.add(u);
       send(res, 202, { ok: true });
     });
+    if (p === '/api/sources' && req.method === 'GET') return send(res, 200, sources.state());
+    if (p === '/api/sources' && req.method === 'POST') return readJson(req, res, async ({ url: u, title }) => { await sources.add(u, String(title || '')); send(res, 201, { ok: true }); });
+    if (p === '/api/sources' && req.method === 'DELETE') return readJson(req, res, ({ id }) => { sources.remove(String(id)); send(res, 200, { ok: true }); });
+    if (p === '/api/sources/refresh' && req.method === 'POST') return readJson(req, res, async () => { await sources.refreshAll(); send(res, 200, { ok: true }); });
     if (p === '/api/feeds' && req.method === 'GET') return send(res, 200, feeds.state());
     if (p === '/api/feeds' && req.method === 'POST') return readJson(req, res, async ({ url: u, filter, backfill }) => {
       await feeds.add(u, { filter: String(filter || '').slice(0, 200), backfill: !!backfill });
