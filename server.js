@@ -63,10 +63,12 @@ async function proxyRemote(req, res, f) {
   const ac = new AbortController();
   res.on('close', () => ac.abort());
   try {
-    let url = await sources.resolve(sources.getEntry(f.id) || { url: f.url });
+    const entry = sources.getEntry(f.id) || { url: f.url };
+    let url = await sources.resolve(entry);
     for (let hop = 0; hop < 5; hop++) {
       await checkUrl(url);
       const headers = { 'User-Agent': 'AnimeLibrary/1.0' };
+      if (entry.referer) headers.Referer = entry.referer;     // como haría un navegador al reproducir desde la página
       if (req.headers.range) headers.Range = req.headers.range;
       const up = await fetch(url, { redirect: 'manual', headers, signal: ac.signal });
       if (up.status >= 300 && up.status < 400 && up.headers.get('location')) { url = new URL(up.headers.get('location'), url).href; continue; }

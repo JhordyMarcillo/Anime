@@ -170,9 +170,9 @@ $('dl-sub').onclick = () => { const v = $('dl-url').value; if (v) sendDl('POST',
 
 async function loadSources() {
   const list = await (await fetch('/api/sources')).json();
-  const kinds = { direct: 'video', feed: 'feed', page: 'página' };
+  const kinds = { direct: 'video', feed: 'feed', page: 'página', site: 'sitio' };
   $('src-list').replaceChildren(...list.map((s) => el('li', {},
-    `[${kinds[s.type] || s.type}] ${s.title ? s.title + ' · ' : ''}${s.url} · ${s.count} entradas${s.lastError ? ' · error: ' + s.lastError : ''} `,
+    `[${kinds[s.type] || s.type}] ${s.title ? s.title + ' · ' : ''}${s.url} · ${s.crawling ? 'rastreando… ' + (s.progress || '') : s.count + ' entradas'}${s.lastError ? ' · error: ' + s.lastError : ''} `,
     el('button', { onclick: async () => { await sendSrc('DELETE', { id: s.id }); } }, 'Quitar'))));
 }
 async function sendSrc(method, body, path = '/api/sources') {

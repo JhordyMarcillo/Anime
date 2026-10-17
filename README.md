@@ -14,6 +14,12 @@ animes, series y películas.
   de un sitio que lo permita. Se guarda en `media/Descargas/` con sus subtítulos y entra
   sola a la biblioteca. "Suscribirse" revisa la URL cada `SUBSCRIPTION_HOURS` (6) y baja
   solo lo nuevo. Se rechazan direcciones de red local.
+- **Explorar un sitio:** pega la URL de un sitio público en "Fuentes en línea" y el servidor lo rastrea
+  (mismo dominio, hasta 40 páginas y profundidad 2, pausa entre peticiones, respeta `robots.txt`), encuentra los videos
+  que publica abiertamente (`<video>`, `<source>`, enlaces a `.mp4/.webm/.mkv`, `og:video`, JSON-LD) y los agrega a la
+  biblioteca agrupados por serie. Se vuelve a rastrear cada 6 h. Si el sitio lo entiende yt-dlp, se usa yt-dlp primero.
+  No ejecuta JavaScript ni descifra reproductores protegidos, y no incluye formas de saltarse bloqueos: sitios con
+  reproductores ofuscados, DRM o solo HLS (`.m3u8`) no darán resultados.
 - **Fuentes en línea (ver sin descargar):** añade una URL de video directo, un feed RSS/Atom o (con yt-dlp)
   una página/lista. Sus videos aparecen en la biblioteca con la etiqueta "en línea" (agrupados por título,
   con póster y sinopsis) y se reproducen en streaming a través de tu servidor, con seek (Range). Funciona igual
