@@ -168,12 +168,32 @@ async function sendDl(method, body) {
 $('dl-form').onsubmit = async (e) => { e.preventDefault(); await sendDl('POST', { url: $('dl-url').value }); $('dl-url').value = ''; };
 $('dl-sub').onclick = () => { const v = $('dl-url').value; if (v) sendDl('POST', { url: v, subscribe: true }); };
 
+async function loadFeeds() {
+  const d = await (await fetch('/api/feeds')).json();
+  const when = (t) => (t ? new Date(t).toLocaleString() : 'nunca');
+  $('feed-list').replaceChildren(...d.feeds.map((f) => el('li', {},
+    `${f.url}${f.filter ? ' · filtro: ' + f.filter : ''} · última revisión: ${when(f.lastCheck)} · descargados: ${f.downloaded}${f.lastError ? ' · error: ' + f.lastError : ''} `,
+    el('button', { onclick: async () => { await sendFeed('POST', { id: f.id }, '/api/feeds/check'); } }, 'Revisar ahora'), ' ',
+    el('button', { onclick: async () => { await sendFeed('DELETE', { id: f.id }); } }, 'Quitar'))));
+}
+async function sendFeed(method, body, path = '/api/feeds') {
+  const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) toast((await res.json().catch(() => ({}))).error || 'Error ' + res.status);
+  loadFeeds().catch(() => {});
+}
+$('feed-form').onsubmit = async (e) => {
+  e.preventDefault();
+  await sendFeed('POST', { url: $('feed-url').value, filter: $('feed-filter').value, backfill: $('feed-back').checked });
+  $('feed-url').value = '';
+};
+
 /* ---------- actualización en vivo ---------- */
 const events = new EventSource('/api/events');
-events.onmessage = (e) => { if (e.data === 'downloads') loadDownloads().catch(() => {}); else load().catch(() => {}); };
+events.onmessage = (e) => { if (e.data === 'downloads') { loadDownloads().catch(() => {}); loadFeeds().catch(() => {}); } else load().catch(() => {}); };
 loadDownloads().catch(() => {});
 $('q').oninput = renderGrid;
 $('kind').onchange = renderGrid;
 load().catch((e) => toast(e.message));
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+loadFeeds().catch(() => {});

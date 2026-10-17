@@ -5,7 +5,8 @@ const path = require('path');
 const { spawn, spawnSync } = require('child_process');
 const { Library, VIDEO, SUB } = require('./lib/library');
 const { toVtt } = require('./lib/subs');
-const { Downloader } = require('./lib/downloader');
+const { Downloader, checkUrl } = require('./lib/downloader');
+const { Feeds } = require('./lib/feeds');
 
 const PORT = +process.env.PORT || 8000;
 const HOST = process.env.HOST || '127.0.0.1';   // 0.0.0.0 para abrir a tu red local
@@ -25,15 +26,18 @@ const authorized = (req) => {
   const got = Buffer.from(m[1], 'base64');
   return got.length === AUTH.length && require('crypto').timingSafeEqual(got, AUTH);
 };
+const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'));
 const PUBLIC = path.join(__dirname, 'public');
 const HAS_FFMPEG = spawnSync('ffmpeg', ['-version']).status === 0;
 const NATIVE = new Set(['.mp4', '.m4v', '.webm', '.mov']);
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.mp4': 'video/mp4',
   '.m4v': 'video/mp4', '.webm': 'video/webm', '.mov': 'video/mp4', '.mkv': 'video/x-matroska', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json', '.avi': 'video/x-msvideo' };
 
-const lib = new Library(MEDIA_DIR, path.join(__dirname, 'data'));
-const dl = new Downloader(MEDIA_DIR, path.join(__dirname, 'data'));
+const lib = new Library(MEDIA_DIR, DATA_DIR);
+const dl = new Downloader(MEDIA_DIR, DATA_DIR);
+const feeds = new Feeds(dl, DATA_DIR, checkUrl);
 const clients = new Set();
+feeds.on('update', () => { for (const r of clients) r.write('data: downloads\n\n'); });
 dl.on('update', () => { for (const r of clients) r.write('data: downloads\n\n'); });
 lib.on('change', () => { for (const r of clients) r.write('data: change\n\n'); });
 
@@ -114,6 +118,16 @@ http.createServer((req, res) => {
     if (p === '/api/downloads' && req.method === 'POST') return readJson(req, res, async ({ url: u, subscribe }) => {
       if (subscribe) dl.subscribe(u); else await dl.add(u);
       send(res, 202, { ok: true });
+    });
+    if (p === '/api/feeds' && req.method === 'GET') return send(res, 200, feeds.state());
+    if (p === '/api/feeds' && req.method === 'POST') return readJson(req, res, async ({ url: u, filter, backfill }) => {
+      await feeds.add(u, { filter: String(filter || '').slice(0, 200), backfill: !!backfill });
+      send(res, 201, { ok: true });
+    });
+    if (p === '/api/feeds' && req.method === 'DELETE') return readJson(req, res, ({ id }) => { feeds.remove(String(id)); send(res, 200, { ok: true }); });
+    if (p === '/api/feeds/check' && req.method === 'POST') return readJson(req, res, async ({ id }) => {
+      if (id) await feeds.checkNow(String(id)); else await feeds.checkAll();
+      send(res, 200, { ok: true });
     });
     if (p === '/api/downloads' && req.method === 'DELETE') return readJson(req, res, ({ url: u }) => { dl.unsubscribe(u); send(res, 200, { ok: true }); });
     let m;

@@ -14,6 +14,11 @@ animes, series y películas.
   de un sitio que lo permita. Se guarda en `media/Descargas/` con sus subtítulos y entra
   sola a la biblioteca. "Suscribirse" revisa la URL cada `SUBSCRIPTION_HOURS` (6) y baja
   solo lo nuevo. Se rechazan direcciones de red local.
+- **Feeds automáticos (RSS/Atom):** pega una vez la URL de un feed y un filtro (`show 1080p -batch`,
+  todas las palabras deben aparecer, `-palabra` excluye, `"frase exacta"`). Se revisa cada
+  `FEED_MINUTES` (30) y se baja solo lo nuevo; al añadirlo, lo ya publicado no se baja salvo que marques
+  "bajar también lo ya publicado". Máx. 10 descargas por revisión. Usa el enlace directo del item
+  (`enclosure`) o su página (con yt-dlp). Los `.torrent`/magnet no se soportan.
 - **Subtítulos:** `.srt`, `.vtt`, `.ass/.ssa` junto al video con el mismo nombre
   (`Episodio 01.es.srt`), convertidos a WebVTT.
 - **Reproducción:** rango HTTP (seek), siguiente episodio automático y "continuar viendo".
@@ -50,7 +55,7 @@ node server.js          # Node >= 20
 ```
 
 Variables: `PORT` (8000), `HOST` (127.0.0.1; usa 0.0.0.0 para tu red local),
-`MEDIA_DIR` (./media), `TMDB_API_KEY`.
+`MEDIA_DIR` (./media), `DATA_DIR` (./data), `TMDB_API_KEY`, `FEED_MINUTES` (30), `SUBSCRIPTION_HOURS` (6).
 
 ## Organización recomendada
 

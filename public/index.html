@@ -32,6 +32,15 @@
     </form>
     <p id="dl-note" class="muted"></p>
     <ul id="dl-jobs"></ul>
+    <h3>Feeds automáticos (RSS / Atom)</h3>
+    <p class="muted">Pega un feed con enlaces a videos. Cada cierto tiempo se revisa y se baja solo lo nuevo que cumpla el filtro.</p>
+    <form id="feed-form">
+      <input id="feed-url" type="url" placeholder="URL del feed RSS/Atom" required>
+      <input id="feed-filter" type="text" placeholder='Filtro: palabras que deben aparecer, -excluir, "frase exacta"'>
+      <label class="muted"><input id="feed-back" type="checkbox"> bajar también lo ya publicado</label>
+      <button>Añadir feed</button>
+    </form>
+    <ul id="feed-list"></ul>
     <h3>Suscripciones</h3>
     <ul id="dl-subs"></ul>
   </details>
