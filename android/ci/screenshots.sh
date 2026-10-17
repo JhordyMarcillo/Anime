@@ -46,9 +46,7 @@ shot 4-detalle
 
 # 4) Reproductor nativo: se lanza directo con la lista de episodios de la primera serie
 adb root >/dev/null 2>&1; sleep 3
-J=$(curl -s -u demo:demo1234 localhost:8000/api/library | jq -c '[.[] | select(.kind=="series")][0].items | map({id:id, url:("/stream/"+id+"?raw=1"), subs:(.subs | map({label:.label, url:("/sub/"+(.id // "")+"/"+(.n|tostring))}))})')
-# las rutas /sub necesitan el id del episodio: se reconstruyen aquí
-J=$(curl -s -u demo:demo1234 localhost:8000/api/library | jq -c '[.[] | select(.kind=="series")][0].items | map(. as $i | {id:$i.id, url:("/stream/"+$i.id+"?raw=1"), subs:($i.subs | map({label:.label, url:("/sub/"+$i.id+"/"+(.n|tostring))}))})')
+J=$(curl -s -u demo:demo1234 localhost:8000/api/library | jq -c '([.[] | select(.kind=="series" and (.items | map(.subs | length) | add) > 0)][0]).items | map(. as $i | {id:$i.id, url:("/stream/"+$i.id+"?raw=1"), subs:($i.subs | map({label:.label, url:("/sub/"+$i.id+"/"+(.n|tostring))}))})')
 echo "playlist: $J"
 adb shell am start -n $PKG/.PlayerActivity --es playlist "'$J'" --ei index 0 --es saved "'{}'"
 sleep 4

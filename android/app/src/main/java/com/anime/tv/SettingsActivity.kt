@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -53,13 +54,15 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        setContentView(LinearLayout(this).apply {
+        val form = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(160, 48, 160, 48)
             addView(title); addView(help); addView(url); addView(user); addView(pass)
             addView(save, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = 32 })
-        })
+        }
+        // ScrollView: con el teclado en pantalla se puede bajar hasta usuario, clave y el botón.
+        setContentView(ScrollView(this).apply { isFillViewport = true; addView(form) })
         url.requestFocus()
     }
 }
