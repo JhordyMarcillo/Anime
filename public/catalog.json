@@ -1,0 +1,34 @@
+{
+  "sections": [
+    {
+      "title": "Canales de YouTube con anime con licencia (gratis, con anuncios)",
+      "note": "Requieren yt-dlp en el servidor. La disponibilidad depende de tu región. El servidor valida el canal al añadirlo.",
+      "items": [
+        { "name": "Muse Asia", "desc": "Series y películas de anime con licencia, publicadas por el distribuidor.", "kind": "source", "needs": "ytdlp", "url": "https://www.youtube.com/@MuseAsia/videos" },
+        { "name": "Ani-One Asia", "desc": "Series completas de anime con licencia, subtituladas.", "kind": "source", "needs": "ytdlp", "url": "https://www.youtube.com/@AniOneAsia/videos" }
+      ]
+    },
+    {
+      "title": "Internet Archive (dominio público y licencias abiertas)",
+      "note": "No necesita yt-dlp. Se añaden los videos más descargados de la colección (hasta 30).",
+      "items": [
+        { "name": "Animación y dibujos animados", "desc": "Cortos y películas animadas clásicas de dominio público.", "kind": "source", "url": "https://archive.org/details/animationandcartoons" },
+        { "name": "Películas de código abierto", "desc": "Películas libres como las de la Blender Foundation.", "kind": "source", "url": "https://archive.org/details/opensource_movies" }
+      ]
+    },
+    {
+      "title": "Apps oficiales (se ven en su propia app, no se integran aquí)",
+      "note": "Sus videos están protegidos y solo se pueden ver desde su app o web. En la app de Android TV estos enlaces abren la app oficial si la tienes instalada.",
+      "items": [
+        { "name": "Crunchyroll", "desc": "Catálogo más grande de anime; plan gratis con anuncios y planes de pago.", "kind": "link", "url": "https://www.crunchyroll.com/" },
+        { "name": "Tubi", "desc": "Películas y series gratis con anuncios, incluye anime.", "kind": "link", "url": "https://tubitv.com/" },
+        { "name": "RetroCrush", "desc": "Anime clásico gratis con anuncios.", "kind": "link", "url": "https://www.retrocrush.tv/" }
+      ]
+    },
+    {
+      "title": "Tus propios archivos",
+      "note": "Arrastra tus videos y subtítulos a la página, o cópialos a la carpeta media/. Se detectan solos, con póster y sinopsis.",
+      "items": []
+    }
+  ]
+}

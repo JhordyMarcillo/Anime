@@ -53,8 +53,12 @@ class MainActivity : AppCompatActivity() {
             setBackgroundColor(0xFF0F1115.toInt())
             addJavascriptInterface(Bridge(), "AndroidTV")
             webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(v: WebView, r: WebResourceRequest) =
-                    r.url.host != cfg.host // solo se navega dentro de tu servidor
+                override fun shouldOverrideUrlLoading(v: WebView, r: WebResourceRequest): Boolean {
+                    if (r.url.host == cfg.host) return false
+                    // Enlaces externos (Crunchyroll, Tubi...): se abren en su app oficial o en el navegador.
+                    runCatching { startActivity(Intent(Intent.ACTION_VIEW, r.url).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    return true
+                }
                 override fun onReceivedHttpAuthRequest(v: WebView, h: HttpAuthHandler, host: String, realm: String) {
                     if (host == cfg.host && authTries++ < 2) h.proceed(cfg.user, cfg.pass) else { h.cancel(); openSettings("Usuario o contraseña incorrectos.") }
                 }

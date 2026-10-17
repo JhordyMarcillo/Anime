@@ -14,6 +14,11 @@ animes, series y películas.
   de un sitio que lo permita. Se guarda en `media/Descargas/` con sus subtítulos y entra
   sola a la biblioteca. "Suscribirse" revisa la URL cada `SUBSCRIPTION_HOURS` (6) y baja
   solo lo nuevo. Se rechazan direcciones de red local.
+- **Catálogo de fuentes legales:** en "Descargas y suscripciones" hay un catálogo con un clic para: canales de YouTube
+  con anime con licencia (Muse Asia, Ani-One; requieren yt-dlp), colecciones de Internet Archive (dominio público y
+  licencias abiertas; sin yt-dlp), enlaces a las apps oficiales (Crunchyroll, Tubi, RetroCrush: se ven en su app, no
+  se integran) y tus propios archivos. Edita `public/catalog.json` para añadir tus propias fuentes. Las URLs del catálogo
+  se validan al añadirlas; no pude comprobarlas desde el entorno de desarrollo.
 - **Explorar un sitio:** pega la URL de un sitio público en "Fuentes en línea" y el servidor lo rastrea
   (mismo dominio, hasta 40 páginas y profundidad 2, pausa entre peticiones, respeta `robots.txt`), encuentra los videos
   que publica abiertamente (`<video>`, `<source>`, enlaces a `.mp4/.webm/.mkv`, `og:video`, JSON-LD) y los agrega a la

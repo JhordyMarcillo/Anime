@@ -47,3 +47,9 @@ video{width:100%;max-height:70vh;background:#000;border-radius:8px}
 #src-form{display:flex;gap:.5rem;flex-wrap:wrap}
 #src-form input[type=url],#src-form input[type=text]{flex:1;min-width:200px}
 .tag{background:#262a33;color:var(--muted);border-radius:4px;padding:0 .4rem;font-size:.75rem}
+#catalog h4{margin:.8rem 0 .2rem}
+#catalog .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.5rem;margin-top:.4rem}
+#catalog .item{background:#262a33;border-radius:8px;padding:.6rem}
+#catalog .item p{margin:.2rem 0 .5rem;font-size:.85rem}
+#catalog a.btn{display:inline-block;background:var(--accent);color:#fff;border-radius:6px;padding:.4rem .7rem;text-decoration:none}
+button[disabled]{opacity:.5;cursor:not-allowed}

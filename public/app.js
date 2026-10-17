@@ -168,6 +168,30 @@ async function sendDl(method, body) {
 $('dl-form').onsubmit = async (e) => { e.preventDefault(); await sendDl('POST', { url: $('dl-url').value }); $('dl-url').value = ''; };
 $('dl-sub').onclick = () => { const v = $('dl-url').value; if (v) sendDl('POST', { url: v, subscribe: true }); };
 
+async function loadCatalog() {
+  const [cat, srcs, dl] = await Promise.all([
+    fetch('catalog.json').then((r) => r.json()),
+    fetch('/api/sources').then((r) => r.json()),
+    fetch('/api/downloads').then((r) => r.json()),
+  ]);
+  const have = new Set(srcs.map((x) => x.url));
+  $('catalog').replaceChildren(...cat.sections.map((sec) => el('div', {},
+    el('h4', {}, sec.title), el('p', { className: 'muted' }, sec.note || ''),
+    el('div', { className: 'items' }, ...sec.items.map((it) => {
+      let action;
+      if (it.kind === 'link') action = el('a', { className: 'btn', href: it.url, target: '_blank', rel: 'noopener' }, 'Abrir');
+      else {
+        const blocked = it.needs === 'ytdlp' && !dl.ytdlp;
+        action = el('button', {
+          disabled: blocked || have.has(it.url),
+          title: blocked ? 'Instala yt-dlp en el servidor' : '',
+          onclick: async () => { toast('Consultando la fuente...'); await sendSrc('POST', { url: it.url }); loadCatalog().catch(() => {}); },
+        }, have.has(it.url) ? 'Añadida' : blocked ? 'Requiere yt-dlp' : 'Añadir');
+      }
+      return el('div', { className: 'item' }, el('strong', {}, it.name), el('p', { className: 'muted' }, it.desc), action);
+    })))));
+}
+
 async function loadSources() {
   const list = await (await fetch('/api/sources')).json();
   const kinds = { direct: 'video', feed: 'feed', page: 'página', site: 'sitio' };
@@ -178,7 +202,7 @@ async function loadSources() {
 async function sendSrc(method, body, path = '/api/sources') {
   const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   if (!res.ok) toast((await res.json().catch(() => ({}))).error || 'Error ' + res.status);
-  loadSources().catch(() => {});
+  loadSources().catch(() => {}); loadCatalog().catch(() => {});
 }
 $('src-form').onsubmit = async (e) => {
   e.preventDefault();
@@ -218,3 +242,4 @@ load().catch((e) => toast(e.message));
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 loadFeeds().catch(() => {});
 loadSources().catch(() => {});
+loadCatalog().catch(() => {});
